@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101014">
+<meta name="robots" content="noindex,nofollow">
+<title>Fila de Músicas — Alertas</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#0f1014;color:#fafafa}
+main{max-width:720px;margin:0 auto;padding:22px 16px 80px}
+small,.muted{color:#b6b8bf}
+h1{margin:8px 0 2px;font-size:clamp(29px,7vw,43px);line-height:1.12}
+h2{font-size:22px;margin:25px 0 12px}
+.brand{font-weight:750;color:#ff942d;letter-spacing:.04em}
+.sub{line-height:1.6;color:#cacbd1}
+.panel{background:#1c1d24;border:1px solid #353741;border-radius:18px;padding:18px;margin:18px 0}
+.status{display:flex;align-items:center;gap:9px;font-weight:650;margin:9px 0 5px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#e4b24b}
+.dot.ok{background:#37c780}.dot.err{background:#f26464}
+.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:15px 14px;border-radius:11px;border:0;min-height:48px;background:#ff942d;color:#171107;font-size:17px;font-weight:760;text-decoration:none;cursor:pointer}
+.btn.secondary{background:#30323d;color:#fff}
+.btn:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.actions .wide{grid-column:1/-1}
+a.btn{display:flex}
+#notice{border:2px solid #ff5050;background:#4d1420;padding:20px;border-radius:18px;margin:18px 0;font-size:20px;font-weight:750;line-height:1.45;animation:flash .55s 3 alternate}
+#notice[hidden]{display:none}
+@keyframes flash{to{border-color:#ffb830;background:#662328}}
+.counter{display:flex;align-items:baseline;gap:15px}
+.counter strong{font-size:66px;color:#ff942d;line-height:1}
+.order{padding:14px 0;border-bottom:1px solid #34343d}
+.order:last-child{border:0}
+.order b{color:#ffd27d}
+.order .secondaryText{font-size:14px;color:#b8b9c1;overflow-wrap:anywhere;margin-top:5px}
+.error{font-size:14px;color:#ffb5b5;overflow-wrap:anywhere;line-height:1.5}
+.note{font-size:13px;line-height:1.55;color:#aeb0ba}
+@media(max-width:420px){.actions{grid-template-columns:1fr}.actions .wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">🎤 FATO'S HOUSE • KARAOKÊ</div>
+<h1>Fila de músicas</h1>
+<p class="sub">Monitor de novos pedidos com som, vibração e aviso na tela.</p>
+<section class="panel">
+  <div class="status"><span id="dot" class="dot"></span><span id="status">Conectando à fila...</span></div>
+  <small id="updated">Verificando os pedidos...</small>
+  <div class="actions">
+    <button id="enable" class="btn wide" type="button">🔔 Ativar os três avisos</button>
+    <button id="test" class="btn secondary" type="button">🔊 Testar aviso</button>
+    <button id="refresh" class="btn secondary" type="button">↻ Atualizar agora</button>
+    <a class="btn secondary wide" href="https://fila-karaoke-fatorelli.grassybull16.chatgpt.site/" target="_blank" rel="noopener noreferrer">Abrir a fila original ↗</a>
+  </div>
+  <div id="permission" class="note" aria-live="polite">Toque em “Ativar os três avisos” e permita notificações, quando solicitado.</div>
+  <p id="error" class="error" role="status" hidden></p>
+</section>
+<section id="notice" role="alert" aria-live="assertive" hidden></section>
+<section class="panel">
+  <div class="counter"><strong id="total">—</strong><span class="muted">pedidos encontrados</span></div>
+  <p class="note">A página verifica novos pedidos a cada 5 segundos. Os que já estavam na fila ao abrir a página não disparam aviso.</p>
+  <div id="orders" aria-live="polite"><span class="muted">Carregando pedidos...</span></div>
+</section>
+<p class="note">Para os avisos funcionarem, mantenha esta página aberta no Chrome, preferencialmente com o celular ligado e a tela ativa. Quando o Android suspender a página, não há garantia de alerta. Este monitor não substitui a fila original.</p>
+</main>
+<script>
+'use strict';
+const API='https://fila-karaoke-fatorelli.grassybull16.chatgpt.site/api/pedidos';
+const $=id=>document.getElementById(id);
+const known=new Set();
+let initialized=false, audio=null,enabled=false,checking=false,noticeTimer=0,sw=null;
+const fmt=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const readable=(v)=>String(v==null?'':v);
+const first=(item,keys)=>{for(const k of keys){if(item && item[k]!=null && item[k]!=='')return readable(item[k])}return ''};
+function setStatus(message,state){$('status').textContent=message;$('dot').className='dot '+(state||'')}
+function extract(data){
+ if(Array.isArray(data))return data;
+ if(!data || typeof data!=='object')throw Error('Resposta inesperada do servidor de pedidos.');
+ const candidates=[data.pedidos,data.requests,data.items,data.queue,data.fila,data.data,data.result,data.results,data.data&&data.data.pedidos,data.data&&data.data.items];
+ for(const value of candidates)if(Array.isArray(value))return value;
+ throw Error('O formato da fila não foi reconhecido.');
+}
+function identify(item,i){
+ return first(item,['id','requestKey','request_key','uuid','_id']) ||
+ [first(item,['createdAt','created_at','timestamp','time','date']),
+ first(item,['singer','nome','nomeCantor','name']),
+ first(item,['code','codigo']),first(item,['song','musica','title'])].join('|') || String(i);
+}
+function summarize(item){
+ const singer=first(item,['singer','nome','name','nomeCantor','singerName'])||'Participante';
+ const song=first(item,['song','musica','title','music'])||'Música não informada';
+ const artist=first(item,['artist','artista','cantor']);
+ const code=first(item,['code','codigo','songCode']);
+ const table=first(item,['tableNumber','table','mesa']);
+ return {singer,song,description:[artist&&'Artista: '+artist,code&&'Código: '+code,table&&'Mesa: '+table].filter(Boolean).join(' • ')};
+}
+function appendOrders(orders){
+ const target=$('orders');target.replaceChildren();
+ if(!orders.length){const p=document.createElement('p');p.className='muted';p.textContent='Nenhum pedido nesta lista.';target.appendChild(p);return}
+ for(const item of orders.slice(0,50)){
+  const d=document.createElement('div');d.className='order';
+  const s=summarize(item);
+  const name=document.createElement('b');name.textContent=s.singer+' — '+s.song;d.appendChild(name);
+  if(s.description){const more=document.createElement('div');more.className='secondaryText';more.textContent=s.description;d.appendChild(more)}
+  target.appendChild(d);
+ }
+}
+function sound(){
+ if(!audio)return;
+ try{
+  if(audio.state==='suspended')audio.resume().catch(()=>{});
+  const now=audio.currentTime;
+  [0,0.20,0.40].forEach((delay,i)=>{
+   const osc=audio.createOscillator(),gain=audio.createGain();
+   osc.type='sine';osc.frequency.setValueAtTime(i===1?950:730,now+delay);
+   gain.gain.setValueAtTime(0.001,now+delay);
+   gain.gain.exponentialRampToValueAtTime(0.33,now+delay+0.025);
+   gain.gain.exponentialRampToValueAtTime(0.001,now+delay+0.16);
+   osc.connect(gain).connect(audio.destination);
+   osc.start(now+delay);osc.stop(now+delay+0.17);
+  });
+ }catch(e){console.warn('Som indisponível',e)}
+}
+function vibrate(){try{if(navigator.vibrate)navigator.vibrate([250,120,250,120,350])}catch(e){}}
+async function systemNotification(details){
+ if(!('Notification' in window)||Notification.permission!=='granted')return;
+ try{
+  sw=sw||(navigator.serviceWorker && await navigator.serviceWorker.ready);
+  if(sw && sw.showNotification)await sw.showNotification('🎤 NOVO PEDIDO DE MÚSICA',{
+   body:details,tag:'pedido-karaoke-'+Date.now(),vibrate:[250,120,250,120,350],
+   data:{url:location.href}
+  });
+ }catch(e){console.warn('Notificação do sistema indisponível',e)}
+}
+function showAlert(details,withSystem=true){
+ const el=$('notice');el.hidden=false;el.textContent='🔴 NOVO PEDIDO! '+details;
+ clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>el.hidden=true,20000);
+ if(enabled){sound();vibrate();if(withSystem)systemNotification(details)}
+}
+async function check(){
+ if(checking)return;
+ checking=true;
+ try{
+  const response=await fetch(API,{cache:'no-store',mode:'cors',headers:{'Accept':'application/json'}});
+  if(!response.ok)throw Error('Servidor respondeu HTTP '+response.status);
+  const data=extract(await response.json());
+  const next=[];
+  data.forEach((item,i)=>{const id=identify(item,i);if(initialized&&!known.has(id))next.push(item);known.add(id)});
+  initialized=true;
+  setStatus('Conectado • verificando a cada 5 segundos','ok');
+  $('updated').textContent='Última atualização: '+fmt.format(new Date());
+  $('total').textContent=String(data.length);
+  $('error').hidden=true;
+  appendOrders(data);
+  if(next.length){const detail=next.length===1?(()=>{const s=summarize(next[0]);return s.singer+' pediu '+s.song})():next.length+' novos pedidos chegaram';showAlert(detail)}
+ }catch(error){
+  setStatus('Não foi possível acessar a fila','err');
+  $('error').hidden=false;
+  $('error').textContent='Não consegui ler os pedidos neste endereço. Pode ser falta de conexão ou bloqueio do acesso entre os dois sites. Detalhe: '+(error.message||'Falha na conexão');
+  $('updated').textContent='Tentando novamente em 5 segundos.';
+ }finally{checking=false}
+}
+$('enable').addEventListener('click',async()=>{
+ enabled=true;
+ try{
+  if(!audio){const AudioContext=window.AudioContext||window.webkitAudioContext;if(AudioContext)audio=new AudioContext()}
+  if(audio&&audio.state==='suspended')await audio.resume();
+ }catch(e){console.warn(e)}
+ vibrate();sound();
+ $('enable').textContent='✅ Avisos ativados';
+ $('permission').textContent='Som e vibração ativados nesta sessão. O aviso vermelho aparecerá a cada novo pedido.';
+ if('Notification' in window){
+  try{
+   // A permissão só é pedida depois do toque no botão.
+   const status=await Notification.requestPermission();
+   if(status==='granted')$('permission').textContent+=' Notificações do Android permitidas.';
+   else $('permission').textContent+=' Notificações do Android não permitidas; o aviso dentro da página continua ativo.';
+  }catch(e){$('permission').textContent+=' A notificação do Android não pôde ser ativada.'}
+ }
+});
+$('test').addEventListener('click',()=>{
+ if(!enabled){$('permission').textContent='Primeiro toque em “Ativar os três avisos”.';return}
+ showAlert('Este é apenas um teste, não é pedido real.');
+});
+$('refresh').addEventListener('click',check);
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('./fila-sw.js').then(r=>{sw=r}).catch(e=>console.warn('Service worker indisponível',e));
+}
+check();setInterval(check,5000);
+</script>
+</body></html>
