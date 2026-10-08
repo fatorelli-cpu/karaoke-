@@ -164,6 +164,12 @@ async function check(){
 }
 $('enable').addEventListener('click',async()=>{
  enabled=true;
+ // Pedir permissão imediatamente após o toque, antes de qualquer espera.
+ let notificationPermission=Promise.resolve('unsupported');
+ if('Notification' in window){
+  try{notificationPermission=Notification.permission==='default'?Notification.requestPermission():Promise.resolve(Notification.permission)}
+  catch(e){notificationPermission=Promise.resolve('denied')}
+ }
  try{
   if(!audio){const AudioContext=window.AudioContext||window.webkitAudioContext;if(AudioContext)audio=new AudioContext()}
   if(audio&&audio.state==='suspended')await audio.resume();
@@ -173,8 +179,7 @@ $('enable').addEventListener('click',async()=>{
  $('permission').textContent='Som e vibração ativados nesta sessão. O aviso vermelho aparecerá a cada novo pedido.';
  if('Notification' in window){
   try{
-   // A permissão só é pedida depois do toque no botão.
-   const status=await Notification.requestPermission();
+   const status=await notificationPermission;
    if(status==='granted')$('permission').textContent+=' Notificações do Android permitidas.';
    else $('permission').textContent+=' Notificações do Android não permitidas; o aviso dentro da página continua ativo.';
   }catch(e){$('permission').textContent+=' A notificação do Android não pôde ser ativada.'}
