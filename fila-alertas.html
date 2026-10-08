@@ -70,7 +70,7 @@ a.btn{display:flex}
 const API='https://fila-karaoke-fatorelli.grassybull16.chatgpt.site/api/pedidos';
 const $=id=>document.getElementById(id);
 const known=new Set();
-let initialized=false, audio=null,enabled=false,checking=false,noticeTimer=0,sw=null;
+let initialized=false, audio=null,enabled=false,connected=false,checking=false,noticeTimer=0,sw=null;
 const fmt=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 const readable=(v)=>String(v==null?'':v);
 const first=(item,keys)=>{for(const k of keys){if(item && item[k]!=null && item[k]!=='')return readable(item[k])}return ''};
@@ -148,7 +148,8 @@ async function check(){
   const data=extract(await response.json());
   const next=[];
   data.forEach((item,i)=>{const id=identify(item,i);if(initialized&&!known.has(id))next.push(item);known.add(id)});
-  initialized=true;
+  initialized=true;connected=true;
+  if(enabled)$('enable').textContent='✅ Avisos ativados';
   setStatus('Conectado • verificando a cada 5 segundos','ok');
   $('updated').textContent='Última atualização: '+fmt.format(new Date());
   $('total').textContent=String(data.length);
@@ -156,6 +157,8 @@ async function check(){
   appendOrders(data);
   if(next.length){const detail=next.length===1?(()=>{const s=summarize(next[0]);return s.singer+' pediu '+s.song})():next.length+' novos pedidos chegaram';showAlert(detail)}
  }catch(error){
+  connected=false;
+  if(enabled)$('enable').textContent='⚠️ Avisos preparados (sem conexão)';
   setStatus('Não foi possível acessar a fila','err');
   $('error').hidden=false;
   $('error').textContent='Não consegui ler os pedidos neste endereço. Pode ser falta de conexão ou bloqueio do acesso entre os dois sites. Detalhe: '+(error.message||'Falha na conexão');
@@ -175,8 +178,8 @@ $('enable').addEventListener('click',async()=>{
   if(audio&&audio.state==='suspended')await audio.resume();
  }catch(e){console.warn(e)}
  vibrate();sound();
- $('enable').textContent='✅ Avisos ativados';
- $('permission').textContent='Som e vibração ativados nesta sessão. O aviso vermelho aparecerá a cada novo pedido.';
+ $('enable').textContent=connected?'✅ Avisos ativados':'⚠️ Avisos preparados (sem conexão)';
+ $('permission').textContent='Som e vibração preparados nesta sessão. Os alertas de pedidos só funcionarão quando aparecer Conectado. Se aparecer sem conexão, use a fila original.';
  if('Notification' in window){
   try{
    const status=await notificationPermission;
