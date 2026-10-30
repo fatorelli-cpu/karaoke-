@@ -1447,6 +1447,9 @@ body.home-mode #categoryHome .queue-return{display:block!important;flex:0 0 auto
 .queue-return{display:none!important}
 html.from-queue .queue-return{display:block!important}
 html:not(.from-queue) body.home-mode #categoryHome .queue-return{display:none!important}
+
+/* Em telas mais baixas, o conteúdo continua acessível. */
+body.home-mode #categoryHome{overflow-y:auto!important;overscroll-behavior:contain}
 </style><script>if(new URLSearchParams(location.search).get("origem")==="fila")document.documentElement.classList.add("from-queue");</script><style>
 .voice-search-row{display:flex;align-items:stretch;gap:8px}.voice-search-row #q{flex:1;min-width:0;width:auto}.voice-search-row #voiceSearch{flex:0 0 auto;min-height:48px;padding:10px 14px;border:2px solid #c69427;border-radius:12px;background:#731e2e;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.voice-search-row #voiceSearch[aria-pressed="true"]{background:#a93440}.voice-search-row #voiceSearch:focus-visible{outline:3px solid white;outline-offset:2px}#voiceStatus:not(:empty){padding:7px 2px;color:#fff1ce;font-size:14px;line-height:1.35}@media(max-width:360px){.voice-search-row #voiceSearch{padding:8px;font-size:14px}}
 </style><style>
@@ -1559,7 +1562,7 @@ function enforceCompactCategories(){
   const group=document.getElementById('categoryFilters');
   if(!group)return;
   const short=window.innerHeight<620;
-  const h=short?'30px':'34px';
+  const h=short?'36px':'42px';
   group.style.setProperty('display','flex','important');
   group.style.setProperty('flex-direction','column','important');
   group.style.setProperty('flex','0 0 auto','important');
@@ -1575,7 +1578,7 @@ function enforceCompactCategories(){
     button.style.setProperty('flex','0 0 '+h,'important');
     for(const key of ['height','min-height','max-height'])button.style.setProperty(key,h,'important');
     button.style.setProperty('width','100%','important');
-    button.style.setProperty('font-size',short?'20px':'22px','important');
+    button.style.setProperty('font-size',short?'21px':'24px','important');
     button.style.setProperty('padding','3px 9px','important');
   });
 }
