@@ -1568,7 +1568,7 @@ fitHomeScreen();
 function enforceCompactCategories(){
   const group=document.getElementById('categoryFilters'); if(!group)return;
   const organizer=document.documentElement.classList.contains('from-queue'), short=window.innerHeight<620;
-  const h=short?'36px':'42px';
+  const h=organizer?(short?'42px':'50px'):(short?'36px':'42px');
   group.style.setProperty('display',organizer?'grid':'flex','important');
   group.style.setProperty('grid-template-columns',organizer?'repeat(2,minmax(0,1fr))':'none','important');
   group.style.setProperty('flex-direction','column','important');
@@ -1586,7 +1586,7 @@ function enforceCompactCategories(){
     button.style.setProperty('flex','0 0 '+h,'important');
     for(const key of ['height','min-height','max-height'])button.style.setProperty(key,h,'important');
     button.style.setProperty('width','100%','important');
-    button.style.setProperty('font-size',short?'21px':'24px','important');
+    button.style.setProperty('font-size',organizer?(short?'22px':'25px'):(short?'21px':'24px'),'important');
     button.style.setProperty('padding','3px 9px','important');
   });
 }
