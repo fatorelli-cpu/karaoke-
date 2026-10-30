@@ -1450,6 +1450,13 @@ html:not(.from-queue) body.home-mode #categoryHome .queue-return{display:none!im
 
 /* Em telas mais baixas, o conteúdo continua acessível. */
 body.home-mode #categoryHome{overflow-y:auto!important;overscroll-behavior:contain}
+
+/* Reserva espaço para todas as categorias ao abrir pela fila. */
+html.from-queue body.home-mode .brand-publi img{height:64px!important}
+html.from-queue body.home-mode .brand-publi{padding:2px 10px!important;gap:1px!important}
+html.from-queue body.home-mode .home-intro h1{font-size:27px!important}
+html.from-queue body.home-mode .home-intro .catalog-title{margin:2px auto!important;padding:3px 6px!important}
+html.from-queue body.home-mode .friendship{margin:0 0 2px!important}
 </style><script>if(new URLSearchParams(location.search).get("origem")==="fila")document.documentElement.classList.add("from-queue");</script><style>
 .voice-search-row{display:flex;align-items:stretch;gap:8px}.voice-search-row #q{flex:1;min-width:0;width:auto}.voice-search-row #voiceSearch{flex:0 0 auto;min-height:48px;padding:10px 14px;border:2px solid #c69427;border-radius:12px;background:#731e2e;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.voice-search-row #voiceSearch[aria-pressed="true"]{background:#a93440}.voice-search-row #voiceSearch:focus-visible{outline:3px solid white;outline-offset:2px}#voiceStatus:not(:empty){padding:7px 2px;color:#fff1ce;font-size:14px;line-height:1.35}@media(max-width:360px){.voice-search-row #voiceSearch{padding:8px;font-size:14px}}
 </style><style>
