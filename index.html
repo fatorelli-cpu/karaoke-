@@ -1566,11 +1566,11 @@ document.fonts?.ready.then(fitHomeScreen);
 fitHomeScreen();
 /* Aplica as dimensões também diretamente aos botões, evitando regras antigas de grade flexível. */
 function enforceCompactCategories(){
-  const group=document.getElementById('categoryFilters');
-  if(!group)return;
-  const short=window.innerHeight<620;
+  const group=document.getElementById('categoryFilters'); if(!group)return;
+  const organizer=document.documentElement.classList.contains('from-queue'), short=window.innerHeight<620;
   const h=short?'36px':'42px';
-  group.style.setProperty('display','flex','important');
+  group.style.setProperty('display',organizer?'grid':'flex','important');
+  group.style.setProperty('grid-template-columns',organizer?'repeat(2,minmax(0,1fr))':'none','important');
   group.style.setProperty('flex-direction','column','important');
   group.style.setProperty('flex','0 0 auto','important');
   group.style.setProperty('width','min(84vw, 340px)','important');
@@ -1582,6 +1582,7 @@ function enforceCompactCategories(){
   group.style.setProperty('align-self','center','important');
   group.style.setProperty('overflow','visible','important');
   group.querySelectorAll('button.category-button').forEach(button=>{
+    button.style.setProperty('grid-column',organizer&&button.id==='voiceHome'?'1 / -1':'auto','important');
     button.style.setProperty('flex','0 0 '+h,'important');
     for(const key of ['height','min-height','max-height'])button.style.setProperty(key,h,'important');
     button.style.setProperty('width','100%','important');
