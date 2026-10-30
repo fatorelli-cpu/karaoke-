@@ -1582,7 +1582,7 @@ function enforceCompactCategories(){
   group.style.setProperty('align-self','center','important');
   group.style.setProperty('overflow','visible','important');
   group.querySelectorAll('button.category-button').forEach(button=>{
-    button.style.setProperty('grid-column',organizer&&button.id==='voiceHome'?'1 / -1':'auto','important');
+    button.style.setProperty('grid-column',organizer&&(button.id==='voiceHome'||button.dataset.category==='all')?'1 / -1':'auto','important');
     button.style.setProperty('flex','0 0 '+h,'important');
     for(const key of ['height','min-height','max-height'])button.style.setProperty(key,h,'important');
     button.style.setProperty('width','100%','important');
