@@ -1443,7 +1443,11 @@ body.home-mode #categoryHome .queue-return{flex:0 0 auto;width:min(84vw,340px);m
 body.home-mode #categoryHome .category-filters{gap:4px!important}
 
 body.home-mode #categoryHome .queue-return{display:block!important;flex:0 0 auto!important;min-height:40px!important;max-height:none!important;width:min(84vw,340px)!important;padding:9px 8px!important;font-size:16px!important;line-height:20px!important;margin:0 auto 4px!important;visibility:visible!important;overflow:visible!important}
-</style><style>
+
+.queue-return{display:none!important}
+html.from-queue .queue-return{display:block!important}
+html:not(.from-queue) body.home-mode #categoryHome .queue-return{display:none!important}
+</style><script>if(new URLSearchParams(location.search).get("origem")==="fila")document.documentElement.classList.add("from-queue");</script><style>
 .voice-search-row{display:flex;align-items:stretch;gap:8px}.voice-search-row #q{flex:1;min-width:0;width:auto}.voice-search-row #voiceSearch{flex:0 0 auto;min-height:48px;padding:10px 14px;border:2px solid #c69427;border-radius:12px;background:#731e2e;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.voice-search-row #voiceSearch[aria-pressed="true"]{background:#a93440}.voice-search-row #voiceSearch:focus-visible{outline:3px solid white;outline-offset:2px}#voiceStatus:not(:empty){padding:7px 2px;color:#fff1ce;font-size:14px;line-height:1.35}@media(max-width:360px){.voice-search-row #voiceSearch{padding:8px;font-size:14px}}
 </style><style>
 body.home-mode #categoryFilters #voiceHome{background:#157a42!important;background-image:none!important;color:#fff!important;border:2px solid #a5e9b9!important;box-shadow:0 3px 0 #084725,0 5px 10px #0008!important;font-weight:800!important}
