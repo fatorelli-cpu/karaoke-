@@ -1569,4 +1569,33 @@ button.addEventListener('click',function(){
   recognition.start();
  }catch(e){listening=false;button.setAttribute('aria-pressed','false');button.querySelector('span').textContent='Falar';status.textContent='Não foi possível iniciar o microfone. Tente novamente ou digite a busca.';}
 });
-})();</script><script>document.getElementById('voiceHome').addEventListener('click',function(){const instruction=document.querySelector('#categoryHome .choose-category');instruction.textContent='Escolha uma categoria e toque em 🎤 Falar';instruction.setAttribute('role','status');document.querySelector('#categoryFilters button[data-category]').focus();});</script></body></html>
+})();</script><script>(function(){
+ const button=document.getElementById('voiceHome'),instruction=document.querySelector('#categoryHome .choose-category');
+ const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+ let running=false,recognition,hasResult=false,hasError=false;
+ instruction.setAttribute('role','status');instruction.setAttribute('aria-live','polite');
+ button.textContent='🎤 Falar categoria';button.setAttribute('aria-label','Escolher categoria por voz');button.setAttribute('aria-pressed','false');
+ button.addEventListener('click',function(){
+  if(!Speech){instruction.textContent='Voz indisponível neste navegador. Escolha uma categoria nos botões.';return;}
+  if(running){recognition.stop();return;}
+  try{
+   recognition=new Speech();recognition.lang='pt-BR';recognition.continuous=false;recognition.interimResults=false;hasResult=false;hasError=false;
+   recognition.onstart=function(){running=true;button.textContent='🎤 Ouvindo…';button.setAttribute('aria-pressed','true');instruction.textContent='Diga: Todas, Nacional, Inglês, Gospel ou Japonês.';};
+   recognition.onresult=function(event){
+    const text=event.results[0][0].transcript.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    let category=null;
+    if(/\b(todas|todos|tudo|geral)\b/.test(text))category='all';
+    else if(/\b(nacional|nacionais|brasileira|brasileiras)\b/.test(text))category='national';
+    else if(/\b(ingles|inglesa|ingleses|inglesas|internacional)\b/.test(text))category='english';
+    else if(/\b(gospel|gosp[eé]l)\b/.test(text))category='gospel';
+    else if(/\b(japones|japonesa|japonesas|japoneses)\b/.test(text))category='japanese';
+    hasResult=true;
+    if(category){instruction.textContent='Categoria selecionada.';window.location.hash='categoria='+category;}
+    else instruction.textContent='Não identifiquei a categoria. Diga Todas, Nacional, Inglês, Gospel ou Japonês.';
+   };
+   recognition.onerror=function(event){hasError=true;instruction.textContent=event.error==='not-allowed'?'Permita o microfone no navegador ou escolha uma categoria pelos botões.':event.error==='network'?'Verifique a internet ou escolha uma categoria pelos botões.':'Não consegui ouvir. Tente novamente ou escolha uma categoria pelos botões.';};
+   recognition.onend=function(){running=false;button.textContent='🎤 Falar categoria';button.setAttribute('aria-pressed','false');if(!hasResult&&!hasError)instruction.textContent='Toque no microfone e diga uma categoria.';};
+   recognition.start();
+  }catch(e){running=false;button.textContent='🎤 Falar categoria';button.setAttribute('aria-pressed','false');instruction.textContent='Não consegui iniciar o microfone. Escolha uma categoria pelos botões.';}
+ });
+})();</script></body></html>
