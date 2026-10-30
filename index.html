@@ -1569,4 +1569,4 @@ button.addEventListener('click',function(){
   recognition.start();
  }catch(e){listening=false;button.setAttribute('aria-pressed','false');button.querySelector('span').textContent='Falar';status.textContent='Não foi possível iniciar o microfone. Tente novamente ou digite a busca.';}
 });
-})();</script><script>document.getElementById('voiceHome').addEventListener('click',function(){window.location.hash='categoria=all';updateCategoryView();document.getElementById('voiceSearch').click();});</script></body></html>
+})();</script><script>document.getElementById('voiceHome').addEventListener('click',function(){const instruction=document.querySelector('#categoryHome .choose-category');instruction.textContent='Escolha uma categoria e toque em 🎤 Falar';instruction.setAttribute('role','status');document.querySelector('#categoryFilters button[data-category]').focus();});</script></body></html>
