@@ -1470,6 +1470,15 @@ html.from-queue body.home-mode .friendship{margin:0 0 2px!important}
  body:not(.home-mode) .brand-publi-catalog .brand-social-links a.brand-instagram { font-size: 14px!important; }
  body:not(.home-mode) .brand-publi-catalog .brand-social-links .instagram-mark { width: 16px!important; height: 16px!important; flex-basis: 16px!important; font-size: 15px!important; }
 }
+
+/* No notebook, a página rola inteira e a lista ganha espaço para mostrar as músicas. */
+@media (min-width: 700px) {
+ body:not(.home-mode){height:auto;min-height:100vh;overflow-y:auto;display:block}
+ body:not(.home-mode) .wrap{display:block;min-height:0}
+ body:not(.home-mode) #catalogView{display:block}
+ body:not(.home-mode) #songResults{overflow:visible;min-height:0}
+ body:not(.home-mode) #list{overflow:visible}
+}
 </style><script>if(new URLSearchParams(location.search).get("origem")==="fila")document.documentElement.classList.add("from-queue");</script><style>
 .voice-search-row{display:flex;align-items:stretch;gap:8px}.voice-search-row #q{flex:1;min-width:0;width:auto}.voice-search-row #voiceSearch{flex:0 0 auto;min-height:48px;padding:10px 14px;border:2px solid #c69427;border-radius:12px;background:#731e2e;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.voice-search-row #voiceSearch[aria-pressed="true"]{background:#a93440}.voice-search-row #voiceSearch:focus-visible{outline:3px solid white;outline-offset:2px}#voiceStatus:not(:empty){padding:7px 2px;color:#fff1ce;font-size:14px;line-height:1.35}@media(max-width:360px){.voice-search-row #voiceSearch{padding:8px;font-size:14px}}
 </style><style>
