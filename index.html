@@ -1479,6 +1479,18 @@ html.from-queue body.home-mode .friendship{margin:0 0 2px!important}
  body:not(.home-mode) #songResults{overflow:visible;min-height:0}
  body:not(.home-mode) #list{overflow:visible}
 }
+
+/* Notebook: cabeçalho compacto e lista sem altura limitada. */
+@media (min-width: 700px) {
+ html, body:not(.home-mode) {height:auto!important; min-height:100%!important; max-height:none!important; overflow-y:auto!important}
+ body:not(.home-mode) {display:block!important}
+ body:not(.home-mode) .wrap, body:not(.home-mode) #catalogView {display:block!important; height:auto!important; max-height:none!important; overflow:visible!important}
+ body:not(.home-mode) #songResults, body:not(.home-mode) #list {display:block!important; height:auto!important; max-height:none!important; overflow:visible!important}
+ body:not(.home-mode) .brand-publi.brand-publi-catalog {flex-direction:row!important; gap:16px!important; padding:4px 10px!important}
+ body:not(.home-mode) .brand-publi-catalog .brand-logo-copy {width:auto!important}
+ body:not(.home-mode) .brand-publi-catalog .brand-logo-copy img {width:105px!important; max-height:65px!important}
+ body:not(.home-mode) .brand-publi-catalog .brand-social-links {width:auto!important; margin:0!important}
+}
 </style><script>if(new URLSearchParams(location.search).get("origem")==="fila")document.documentElement.classList.add("from-queue");</script><style>
 .voice-search-row{display:flex;align-items:stretch;gap:8px}.voice-search-row #q{flex:1;min-width:0;width:auto}.voice-search-row #voiceSearch{flex:0 0 auto;min-height:48px;padding:10px 14px;border:2px solid #c69427;border-radius:12px;background:#731e2e;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.voice-search-row #voiceSearch[aria-pressed="true"]{background:#a93440}.voice-search-row #voiceSearch:focus-visible{outline:3px solid white;outline-offset:2px}#voiceStatus:not(:empty){padding:7px 2px;color:#fff1ce;font-size:14px;line-height:1.35}@media(max-width:360px){.voice-search-row #voiceSearch{padding:8px;font-size:14px}}
 </style><style>
